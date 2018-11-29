@@ -206,8 +206,55 @@ public class ShopService implements Service {
   }
 
   @Override
-  public List<String> findForMoney(Float money) {
-    return null;
+  public List<String> findForMoney(Float money, String shop) {
+    List<String> result = new ArrayList<>();
+    try {
+      var shopSet = dao.getData("Shop");
+      String shopID = "";
+      for(List<String> list : shopSet)
+      {
+        if(shop.equals(list.get(1)))
+        {
+          shopID=list.get(0);
+          break;
+        }
+      }
+      if(shopID.equals(""))
+      {
+        throw new Exception(shop+" not found");
+      }
+      var relationSet=dao.getData("ProductsInShops");
+      var productSet = dao.getData("Product");
+      for(List<String> list : relationSet)
+      {
+        if(!list.get(1).equals(shopID))
+        {
+          continue;
+        }
+        Float price = Float.parseFloat(list.get(4).replaceAll(" ",""));
+        if(price>money)
+        {
+          continue;
+        }
+
+        for(var productList:productSet)
+        {
+          if(productList.get(0).equals(list.get(2)))
+          {
+
+            result.add((Math.min((int)((money/price)), Integer.parseInt(list.get(3)))+ " of " + productList.get(1)));
+            break;
+          }
+        }
+      }
+    }
+    catch (Exception e)
+    {
+      System.out.println(e);
+      return null;
+    }
+    return result;
+
   }
 
   @Override
@@ -217,6 +264,64 @@ public class ShopService implements Service {
 
   @Override
   public String findBestShop(String product) {
-    return null;
+    String bestShop = "";
+    try
+    {
+      String productID = "";
+      var productSet=dao.getData("Product");
+      for(var list : productSet)
+      {
+        if(product.equals(list.get(1)))
+        {
+          productID=list.get(0);
+          break;
+        }
+      }
+      if(productID.equals(""))
+      {
+        throw new Exception(product+" not found");
+      }
+      var relationSet=dao.getData("ProductsInShops");
+      Float minPrice=(float)-1;
+      String shopID="";
+      for(var list : relationSet)
+      {
+        if(productID.equals(list.get(2)))
+        {
+          if(minPrice==-1)
+          {
+            minPrice=Float.parseFloat(list.get(4).replaceAll(" ", ""));
+            shopID=list.get(1);
+          }
+          else{
+            Float price=Float.parseFloat(list.get(4).replaceAll(" ", ""));
+            if(minPrice<price)
+            {
+              minPrice=price;
+              shopID=list.get(1);
+            }
+          }
+        }
+      }
+      if(shopID.equals("")){
+        throw new Exception(product + " is not in any shop");
+      }
+      var shopSet=dao.getData("Shop");
+
+      for(var list : shopSet)
+      {
+        if(shopID.equals(list.get(0)))
+        {
+          bestShop=list.get(1);
+          break;
+        }
+      }
+    }
+    catch (Exception e)
+    {
+      System.out.println(e);
+      return "";
+    }
+    return bestShop;
   }
 }

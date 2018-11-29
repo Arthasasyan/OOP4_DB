@@ -11,7 +11,7 @@ public interface Service {
   boolean createProduct(String name);
   boolean bringBatchOfProducts(String shopName, String productName, String count, String price);
   String findBestShop(String product);
-  List<String> findForMoney(Float money);
+  List<String> findForMoney(Float money, String shop);
   Float buy(String product, String shop, int count);
   String findBestShop(Map<String, Integer> batch);
 }
