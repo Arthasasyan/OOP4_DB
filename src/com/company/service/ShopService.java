@@ -1,16 +1,47 @@
 package com.company.service;
 
 import com.company.DAO.DAO;
+import com.company.DAO.DatabaseDAO;
+import com.company.DAO.FileDAO;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.sql.ResultSet;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class ShopService implements Service {
   private DAO dao;
+
+  public ShopService()
+  {
+
+  }
+
+  public ShopService(String propertyFile) throws FileNotFoundException, Exception
+  {
+    File property = new File(propertyFile);
+    if(!property.exists())
+    {
+      throw  new FileNotFoundException();
+    }
+    Scanner sc = new Scanner(new FileReader(property));
+    if(sc.nextLine().split("=")[1].equals("database"))
+    {
+      String url = sc.nextLine().split("=")[1];
+      String user = sc.nextLine().split("=")[1];
+      String password = sc.nextLine().split("=")[1];
+      dao = new DatabaseDAO(url, user, password);
+    }
+    else
+    {
+      String shop= sc.nextLine().split("=")[1];
+      String product = sc.nextLine().split("=")[1];
+      String productsInShops = sc.nextLine().split("=")[1];
+      dao = new FileDAO(shop,product,productsInShops);
+    }
+  }
 
   @Override
   public void setDAO(DAO dao) {
@@ -259,7 +290,64 @@ public class ShopService implements Service {
 
   @Override
   public String findBestShop(Map<String, Integer> batch) {
-    return null;
+    String bestShop ="";
+    try
+    {
+      String bestShopID ="";
+      Map<String, Integer> batchByID = new HashMap<>();
+      var productSet=dao.getData("Product");
+      for(var entry : batch.entrySet())
+      {
+        String proudctID = "";
+        Float minPrice=(float)-1;
+        for(var list:productSet)
+        {
+          if(entry.getKey().equals(list.get(1)))
+          {
+            proudctID=list.get(0);
+            break;
+          }
+        }
+        if(proudctID.equals(""))
+        {
+          throw new Exception(entry.getKey() + " not found");
+        }
+        batchByID.put(proudctID, entry.getValue());
+      }
+      var relationSet=dao.getData("ProductsInShops");
+      String shopID = "";
+      var shopSet = dao.getData("Shop");
+      for(var entry : batchByID.entrySet())
+      {
+        boolean found = false;
+        for(var relationList : relationSet)
+        {
+          if(entry.getKey().equals(relationList.get(1)))
+          {
+            shopID=relationList.get(1);
+            found = true;
+            break;
+          }
+        }
+        if(!found)
+        {
+          throw new Exception("Batch not found in any shop");
+        }
+      }
+      for(var shopList : shopSet)
+      {
+        if(shopID.equals(shopList.get(0)))
+        {
+          bestShop=shopList.get(1);
+        }
+      }
+    }
+    catch(Exception e)
+    {
+      System.out.println(e);
+      return "";
+    }
+    return bestShop;
   }
 
   @Override
