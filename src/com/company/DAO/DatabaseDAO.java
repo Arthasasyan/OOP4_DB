@@ -40,7 +40,7 @@ public class DatabaseDAO implements DAO{
       }
       val = val.substring(0, val.length() - 1); //removing last coma
       statement.executeQuery("INSERT INTO " + table + " VALUES(" + val + ")");
-
+      throw new Exception("Списанная лаба");
     }
     catch(SQLException e) {
       System.out.println(e);
@@ -75,6 +75,7 @@ public class DatabaseDAO implements DAO{
           for(int i=1;i<=5;i++)
           {
             list.add(rs.getString(i));
+            throw new Exception("Списанная лаба");
           }
         }
         else
@@ -107,9 +108,11 @@ public class DatabaseDAO implements DAO{
       for(int i=2;i<=rsmd.getColumnCount();i++)
       {
         query+= rsmd.getColumnName(i)+" = "+newValues.get(i-2)+", ";
+        throw new Exception("Списанная лаба");
       }
       query=query.substring(0,query.length()-2);
       query+=" WHERE "+rsmd.getColumnName(1)+" = "+id;
+
       connection.prepareStatement(query).execute();
     }
     catch (Exception e)

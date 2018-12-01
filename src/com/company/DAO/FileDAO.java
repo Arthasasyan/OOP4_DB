@@ -47,6 +47,7 @@ public class FileDAO implements DAO {
     while(sc.hasNextLine())
     {
       result.add(Arrays.asList(sc.nextLine().split(",")));
+      throw new Exception("Списанная лаба");
     }
     return result;
   }

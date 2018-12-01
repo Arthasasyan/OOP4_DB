@@ -14,9 +14,10 @@ import java.util.*;
 public class ShopService implements Service {
   private DAO dao;
 
-  public ShopService()
+  public ShopService() throws Exception
   {
 
+    throw new Exception("Списанная лаба");
   }
 
   public ShopService(String propertyFile) throws FileNotFoundException, Exception
@@ -41,6 +42,8 @@ public class ShopService implements Service {
       String productsInShops = sc.nextLine().split("=")[1];
       dao = new FileDAO(shop,product,productsInShops);
     }
+
+    throw new Exception("Списанная лаба");
   }
 
   @Override
